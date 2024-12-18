@@ -18,6 +18,11 @@
 #
 # stdout e stderr serão logados em ~/log/$(date +'%Y%m%d%H%M').log
 # O arquivo que contém o histórico de diagnósticos, para o diretório/arquivo informado em $1 ou diretório raiz (/), gerado após o scan, será criado e incrementado em ~/report_data_scan_$1.csv
+#
+# Exemplos: 
+#	1. ./antivirus_analyser.sh
+#	2. ./antivirus_analyser.sh desliga
+#	3. ./antivirus_analyser.sh /media/cdrom desliga
 
 ##### Autor: Rafael Zucon
 ##### e-mail: rafaelzucon@yahoo.com.br

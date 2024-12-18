@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Descrição: Script encerra um ou mais processos informando apenas o nome (ou parte do nome) do processo como argumento/parâmetro
+# Exemplo: ./kill-app chrome firefox 
+
+##### Autor: Rafael Zucon
+##### e-mail: rafaelzucon@yahoo.com.br
+##### Data de criação: 10 de Janeiro de 2023
+
 while true 
 do 
 	var_kill=$(echo $(ps -aux |grep "$(echo $1)" |grep -v "grep" |grep -v "kill-app $(echo $1)" |awk '{print $2}' |awk '{print $1}')) 
