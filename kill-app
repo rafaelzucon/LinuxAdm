@@ -1,0 +1,16 @@
+#!/bin/bash
+
+while true 
+do 
+	var_kill=$(echo $(ps -aux |grep "$(echo $1)" |grep -v "grep" |grep -v "kill-app $(echo $1)" |awk '{print $2}' |awk '{print $1}')) 
+	n=${#var_kill}
+	if [[ $n -gt 0 ]]
+	then 
+		var_res=$(kill -9 $(echo $var_kill))
+		echo $var_res
+		echo "$1 pid $var_kill" 
+		echo "killed $(date +'%Y-%m-%d %H:%M:%S')"
+	fi
+
+	sleep 5 
+done 
