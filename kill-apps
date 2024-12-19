@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Descrição: Encerra todos os processos informados na variável var_process (linha 10)
+# Exemplo: ./kill-apps
+
+##### Autor: Rafael Zucon
+##### e-mail: rafaelzucon@yahoo.com.br
+##### Data de criação: 10 de Janeiro de 2023
+
+var_process="JetBrains\|chrom\|sublime_text\|mousepad\|gimp\|firefox\|google\|Thunar"
+var_kill=$(echo $(ps -aux |grep "$(echo $var_process)" |grep -v "grep" |grep -v "kill-apps" |awk '{print $2}' |awk '{print $1}')) 
+n=${#var_kill}
+if [[ $n -gt 0 ]]
+then 
+	var_res=$(kill -9 $(echo $var_kill))
+	echo $var_res
+	echo "pid $var_kill" 
+	echo "killed $(date +'%Y-%m-%d %H:%M:%S')"
+fi
