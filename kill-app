@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Descrição: Script encerra um ou mais processos informando apenas o nome (ou parte do nome) do processo como argumento/parâmetro
-# Exemplo: ./kill-app chrome firefox 
+# Descrição: Script encerra um processo informando apenas o nome (ou parte do nome) do processo como argumento/parâmetro ($1)
+# Exemplo: ./kill-app firefox 
 
 ##### Autor: Rafael Zucon
 ##### e-mail: rafaelzucon@yahoo.com.br
