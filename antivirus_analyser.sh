@@ -14,7 +14,7 @@
 #
 # Parâmetros/Argumentos (não obrigatórios):
 # 	$1 Deve conter o diretório a partir do qual será aplicado o scan do antivíruis ou deve ser "desliga" caso seja necessário executar shutdown após execução do script.
-# 	$2 Deve ser "desliga" (executa após execução do script). 
+# 	$2 Deve ser "desliga" (executa shutdown após execução do script). 
 #
 # stdout e stderr serão logados em ~/log/$(date +'%Y%m%d%H%M').log
 # O arquivo que contém o histórico de diagnósticos, para o diretório/arquivo informado em $1 ou diretório raiz (/), gerado após o scan, será criado e incrementado em ~/report_data_scan_$1.csv
@@ -27,6 +27,18 @@
 ##### Autor: Rafael Zucon
 ##### e-mail: rafaelzucon@yahoo.com.br
 ##### Data de criação: 16 de Dezembro de 2024
+
+var_process="JetBrains\|chrom\|sublime_text\|mousepad\|gimp\|firefox\|google\|Thunar\|thunar\|atril\|Atril\|libreoffice\|LibreOffice"
+var_kill=$(echo $(ps -aux |grep "$(echo $var_process)" |grep -v "grep" |grep -v "kill-apps" |awk '{print $2}' |awk '{print $1}'))
+n=${#var_kill}
+if [[ $n -gt 0 ]]
+then
+        var_res=$(kill -9 $(echo $var_kill))
+        echo $var_res
+        echo "pid $var_kill"
+        echo "killed $(date +'%Y-%m-%d %H:%M:%S')"
+fi
+
 
 function remove_bar(){ #remove as barras (/) de $1, caso existam, para adicionar sufixo ao nome do arquivo ~/report_data_scan_$1.csv
 	str_name=$1
