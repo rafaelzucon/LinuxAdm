@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# Script para escanear um diretório ou disco em busca de vírus e deletar arquivos infectados.
+# Gera um log em /home/scan_virus_log.txt com o caminho dos arquivos removidos.
+
+TARGET="$1"
+LOGFILE="/home/scan_virus_log.txt"
+
+if [[ -z "$TARGET" ]]; then
+  echo "Uso: $0 /caminho/para/diretorio_ou_disco"
+  exit 1
+fi
+
+echo "==== $(date) ====" > "$LOGFILE"
+
+# Função para registrar erro no log
+log_error() {
+  echo "[ERRO] $1" | tee -a "$LOGFILE"
+}
+
+# Mata todos os processos da sessão do usuário logado (não afeta root)
+login_user=$(logname)
+echo "Matando todos os processos do usuário $login_user..." | tee -a "$LOGFILE"
+sudo pkill -u "$login_user"
+
+# Verifica se ClamAV está instalado
+if ! command -v clamscan &>/dev/null || ! command -v freshclam &>/dev/null; then
+  echo "ClamAV não encontrado. Instalando ClamAV..."
+  if command -v apt &>/dev/null; then
+    sudo apt update && sudo apt install -y clamav clamav-daemon || { log_error "Falha ao instalar ClamAV."; exit 2; }
+  elif command -v dnf &>/dev/null; then
+    sudo dnf install -y clamav clamav-update || { log_error "Falha ao instalar ClamAV."; exit 2; }
+  elif command -v yum &>/dev/null; then
+    sudo yum install -y clamav clamav-update || { log_error "Falha ao instalar ClamAV."; exit 2; }
+  else
+    log_error "Não foi possível identificar o gerenciador de pacotes. Instale o ClamAV manualmente."
+    exit 2
+  fi
+fi
+
+# Para o serviço freshclam se estiver rodando
+if systemctl list-units --type=service | grep -q clamav-freshclam; then
+  sudo systemctl stop clamav-freshclam
+fi
+
+# Atualiza definições de vírus
+echo "Atualizando definições de vírus..." | tee -a "$LOGFILE"
+if ! sudo freshclam | tee -a "$LOGFILE"; then
+  log_error "Falha ao atualizar as definições de vírus."
+fi
+
+# Inicia o serviço freshclam novamente (opcional)
+if systemctl list-unit-files | grep -q clamav-freshclam; then
+  sudo systemctl start clamav-freshclam
+fi
+
+# Cria diretório de quarentena seguro
+QUARANTINE="/tmp/quarentena"
+mkdir -p "$QUARANTINE"
+
+echo "Iniciando scan em $TARGET..." | tee -a "$LOGFILE"
+sudo clamscan -r --move="$QUARANTINE" --log="$LOGFILE" "$TARGET"
+
+echo "" >> "$LOGFILE"
+echo "Arquivos infectados removidos em $(date):" >> "$LOGFILE"
+
+# Extrai linhas do log do clamscan que indicam arquivo infectado
+grep "FOUND" "$LOGFILE" | while read -r line; do
+    FILE_PATH=$(echo "$line" | cut -d: -f1)
+    DIR_PATH=$(dirname "$FILE_PATH")
+    echo "Arquivo: $FILE_PATH" >> "$LOGFILE"
+    echo "Diretório: $DIR_PATH" >> "$LOGFILE"
+    echo "------------------------" >> "$LOGFILE"
+done
+
+echo "Scan finalizado. Veja o log em $LOGFILE"
